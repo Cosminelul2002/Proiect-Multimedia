@@ -3,6 +3,8 @@
 
 // Declaratios
 const canvasImage = document.getElementById('canvasImg');
+const ctx = canvasImage.getContext('2d');
+image = document.createElement('img');
 const uploadButton = document.getElementById('imgUpload');
 const canvasWidth = canvasImage.width;
 const canvasHeight = canvasImage.height;
@@ -16,13 +18,14 @@ let yOffset = 0;
 
 // Draw image method
 const drawImage = (image) => {
-    console.log(image.width);
-    canvasImage.width = image.naturalWidth;
-    canvasImage.height = image.naturalHeight;
+    canvasImage.width = image.width;
+    canvasImage.height = image.height;
 
     const ctx = canvasImage.getContext('2d');
     ctx.drawImage(image, 0, 0);
+    // image.src = canvasImage.toDataURL();
 };
+
 
 // Drag and drop event
 document.addEventListener('dragover', (event) => {
@@ -35,8 +38,8 @@ document.addEventListener('drop', (event) => {
     if (file.length > 0) {
         const reader = new FileReader();
         reader.addEventListener('load', (event) => {
-            const image = document.createElement('img');
             image.addEventListener('load', () => {
+                console.log('pufi');
                 drawImage(image);
             });
             image.setAttribute('src', event.target.result);
@@ -78,26 +81,52 @@ resetCanvas.addEventListener('click', () => {
     ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
 });
 
-canvasImage.addEventListener('click', function (event) {
-    var x = event.offsetX;
-    var y = event.offsetY;
+// canvasImage.addEventListener('click', function (event) {
+//     var x = event.offsetX;
+//     var y = event.offsetY;
 
-    // Calculați dimensiunile zonei selectate
-    var width = 100;
-    var height = 100;
+//     // Calculați dimensiunile zonei selectate
+//     var width = 100;
+//     var height = 100;
 
-    // Obțineți datele pixelilor din zona selectată
-    var ctx = canvasImage.getContext('2d');
-    var imageData = ctx.getImageData(x, y, width, height);
-    var data = imageData.data;
+//     // Obțineți datele pixelilor din zona selectată
+//     var ctx = canvasImage.getContext('2d');
+//     var imageData = ctx.getImageData(x, y, width, height);
+//     var data = imageData.data;
 
-    // Aplicați efectul de întunecare pe fiecare pixel din zona selectată
-    for (var i = 0; i < data.length; i += 4) {
-        data[i] = data[i] / 2; // R
-        data[i + 1] = data[i + 1] / 2; // G
-        data[i + 2] = data[i + 2] / 2; // B
-    }
+//     // Aplicați efectul de întunecare pe fiecare pixel din zona selectată
+//     for (var i = 0; i < data.length; i += 4) {
+//         data[i] = data[i] / 2; // R
+//         data[i + 1] = data[i + 1] / 2; // G
+//         data[i + 2] = data[i + 2] / 2; // B
+//     }
 
-    // Redesenați imaginea modificată în canvas
-    ctx.putImageData(imageData, x, y);
+//     // Redesenați imaginea modificată în canvas
+//     ctx.putImageData(imageData, x, y);
+// });
+
+let startX = 0;
+let startY = 0;
+
+canvasImage.addEventListener('mousedown', (event) => {
+    isDragging = true;
+    startX = event.offsetX;
+    startY = event.offsetY;
 });
+
+canvasImage.addEventListener('mousemove', (event) => {
+    if (isDragging) {
+        ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
+        drawImage(image);
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+    }
+});
+
+
+
+canvasImage.addEventListener('mouseup', (event) => {
+    isDragging = false;
+});
+
+
