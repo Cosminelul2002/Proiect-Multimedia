@@ -23,6 +23,30 @@
                     <button id="imgCrop">Crop</button>
                 </li>
                 <li>
+                    <button id="imgResize">Resize</button>
+                </li>
+                <li>
+                    <button id="imgSelect">Select area</button>
+                </li>
+                <li>
+                    <div class="add-text">
+                        <button id="imgText">Add text to image</button>
+                        <div id="inputContainer" style="display:none">
+                            <div id="userInput">
+                                <input id="text" type="text" id="text" placeholder="Enter text">
+                                <input id="color" type="color" id="color" value="#000000">
+                                <input id="size" type="number" min="1" id="size" placeholder="Enter size">
+                                <select id="position">
+                                    <option value="top">Top</option>
+                                    <option value="bottom">Bottom</option>
+                                    <option value="middle">Middle</option>
+                                </select>
+                            </div>
+                            <button id="addText">Add text</button>
+                        </div>
+                    </div>
+                </li>
+                <li>
                     <button id="clearCanvas">Clear canvas</button>
                 </li>
                 <li>
@@ -30,6 +54,21 @@
                     <input type='file' id="inputImg" accept="image/*" style="display:none">
                 </li>
             </ul>
+        </div>
+        <div id="effectList">
+            <select id="list">
+                <option value="none">None</option>
+                <option value="grayscale">Grayscale</option>
+                <option value="sepia">Sepia</option>
+                <option value="invert">Invert</option>
+                <option value="blur">Blur</option>
+                <option value="brightness">Brightness</option>
+                <option value="contrast">Contrast</option>
+                <option value="saturate">Saturate</option>
+                <option value="hue-rotate">Hue-rotate</option>
+                <option value="opacity">Opacity</option>
+                <option value="drop-shadow">Drop-shadow</option>
+            </select>
         </div>
         <div id="canvasDiv">
             <h2>Drag and drop your image here:</h2>

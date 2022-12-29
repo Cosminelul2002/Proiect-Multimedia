@@ -15,6 +15,7 @@ let initialX;
 let initialY;
 let xOffset = 0;
 let yOffset = 0;
+let effect;
 
 // Draw image method
 const drawImage = (image) => {
@@ -39,7 +40,6 @@ document.addEventListener('drop', (event) => {
         const reader = new FileReader();
         reader.addEventListener('load', (event) => {
             image.addEventListener('load', () => {
-                console.log('pufi');
                 drawImage(image);
             });
             image.setAttribute('src', event.target.result);
@@ -108,25 +108,131 @@ resetCanvas.addEventListener('click', () => {
 let startX = 0;
 let startY = 0;
 
-canvasImage.addEventListener('mousedown', (event) => {
-    isDragging = true;
-    startX = event.offsetX;
-    startY = event.offsetY;
+document.getElementById('imgSelect').addEventListener('click', () => {
+    canvasImage.addEventListener('mousedown', (event) => {
+        isDragging = true;
+        startX = event.offsetX;
+        startY = event.offsetY;
+    });
+    canvasImage.addEventListener('mousemove', (event) => {
+        if (isDragging) {
+            ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
+            drawImage(image);
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+        }
+    });
+    canvasImage.addEventListener('mouseup', (event) => {
+        isDragging = false;
+        console.log(effect);
+        applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
+    });
 });
 
-canvasImage.addEventListener('mousemove', (event) => {
-    if (isDragging) {
-        ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
-        drawImage(image);
-        ctx.setLineDash([5, 5]);
-        ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+document.getElementById('imgEffect').addEventListener('click', () => {
+    document.getElementById('effectList').style.display = 'block';
+});
+
+document.getElementById('list').addEventListener('change', () => {
+    effect = document.getElementById('list').value;
+});
+
+function applyEffectOnSelectedArea(image, startX, startY, endX, endY, effect) {
+    // Set the canvas size to the size of the image
+    canvasImage.width = image.width;
+    canvasImage.height = image.height;
+
+    // Draw the image on the canvas
+    ctx.drawImage(image, 0, 0);
+
+    // Clip the canvas to the selected area
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(startX, startY, endX - startX, endY - startY);
+    ctx.clip();
+
+    // Apply the desired effect on the clipped region
+    switch (effect) {
+        case 'grayscale':
+            ctx.filter = 'grayscale(100%)';
+            break;
+        case 'sepia':
+            ctx.filter = 'sepia(100%)';
+            break;
+        case 'invert':
+            ctx.filter = 'invert(100%)';
+            break;
+        case 'blur':
+            ctx.filter = 'blur(5px)';
+            break;
+        case 'brightness':
+            ctx.filter = 'brightness(200%)';
+            break;
+        case 'contrast':
+            ctx.filter = 'contrast(200%)';
+            break;
+        case 'hue-rotate':
+            ctx.filter = 'hue-rotate(90deg)';
+            break;
+        case 'saturate':
+            ctx.filter = 'saturate(200%)';
+            break;
+        case 'opacity':
+            ctx.filter = 'opacity(50%)';
+            break;
+        default:
+            break;
     }
+
+    // Draw the image on the canvas again to apply the effect
+    ctx.drawImage(image, 0, 0);
+    ctx.restore();
+}
+
+let inputText;
+let inputColor;
+let inputSize;
+let inputPosition;
+
+document.getElementById('imgText').addEventListener('click', () => {
+    document.getElementById('inputContainer').style.display = 'flex';
+});
+
+document.getElementById('text').addEventListener('change', () => {
+    inputText = document.getElementById('text').value;
+    console.log(inputText);
+});
+
+document.getElementById('color').addEventListener('change', () => {
+    inputColor = document.getElementById('color').value;
+    console.log(inputColor);
+});
+
+document.getElementById('size').addEventListener('change', () => {
+    inputSize = document.getElementById('size').value;
+    console.log(inputSize);
+});
+
+document.getElementById('position').addEventListener('change', () => {
+    inputPosition = document.getElementById('position').value;
+    console.log(inputPosition);
 });
 
 
-
-canvasImage.addEventListener('mouseup', (event) => {
-    isDragging = false;
+document.getElementById('addText').addEventListener('click', (event) => {
+    event.preventDefault();
+    ctx.font = `${inputSize}px Arial`;
+    ctx.fillStyle = inputColor;
+    // calculate the center of the canvas
+    const x = canvasImage.width / 2;
+    const y = canvasImage.height / 2;
+    if (inputPosition === 'top') {
+        // draw text at the top of the canvas
+        ctx.textBaseline = 'top';
+    } else if (inputPosition === 'bottom') {
+        ctx.textBaseline = 'bottom';
+    } else {
+        ctx.textBaseline = 'middle';
+    }
+    ctx.fillText(inputText, 0, 0);
 });
-
-
