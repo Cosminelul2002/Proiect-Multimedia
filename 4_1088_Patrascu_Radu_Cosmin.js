@@ -25,7 +25,6 @@ const drawImage = (image) => {
 
     const ctx = canvasImage.getContext('2d');
     ctx.drawImage(image, 0, 0);
-    // image.src = canvasImage.toDataURL();
 };
 
 
@@ -81,84 +80,134 @@ resetCanvas.addEventListener('click', () => {
     canvasImage.width = canvasWidth;
     canvasImage.height = canvasHeight;
     ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
-    drawImage(clearImage);
+    image.src = clearImage.src;
+    drawImage(image);
 });
-
-// canvasImage.addEventListener('click', function (event) {
-//     var x = event.offsetX;
-//     var y = event.offsetY;
-
-//     // Calculați dimensiunile zonei selectate
-//     var width = 100;
-//     var height = 100;
-
-//     // Obțineți datele pixelilor din zona selectată
-//     var ctx = canvasImage.getContext('2d');
-//     var imageData = ctx.getImageData(x, y, width, height);
-//     var data = imageData.data;
-
-//     // Aplicați efectul de întunecare pe fiecare pixel din zona selectată
-//     for (var i = 0; i < data.length; i += 4) {
-//         data[i] = data[i] / 2; // R
-//         data[i + 1] = data[i + 1] / 2; // G
-//         data[i + 2] = data[i + 2] / 2; // B
-//     }
-
-//     // Redesenați imaginea modificată în canvas
-//     ctx.putImageData(imageData, x, y);
-// });
 
 let startX = 0;
 let startY = 0;
+let effectFlag = false;
+let deleteFlag = false;
+let resizeFlag = false;
+let addTextFlag = false;
 let selectedArea;
 
+// Mouse events for the canvas
+function mouseDown(event) {
+    isDragging = true;
+    startX = event.offsetX;
+    startY = event.offsetY;
+}
+
+function mouseMove(event) {
+    if (isDragging) {
+        ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
+        drawImage(image);
+        ctx.setLineDash([5, 5]);
+        ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+    }
+}
+
+function mouseUpEffect(event) {
+    isDragging = false;
+    // selectedArea = ctx.getImageData(startX, startY, event.offsetX - startX, event.offsetY - startY);
+    applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
+    image.src = canvasImage.toDataURL();
+}
+
+function mouseUpDelete(event) {
+    isDragging = false;
+    deleteSelectedArea(image, startX, startY, event.offsetX, event.offsetY);
+    image.src = canvasImage.toDataURL();
+}
+
 document.getElementById('imgSelect').addEventListener('click', () => {
-    canvasImage.addEventListener('mousedown', (event) => {
-        isDragging = true;
-        startX = event.offsetX;
-        startY = event.offsetY;
-    });
-    canvasImage.addEventListener('mousemove', (event) => {
-        if (isDragging) {
-            ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
-            drawImage(image);
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+    if (deleteFlag) {
+        alert('Delete area is active!');
+    } else {
+        if (effectFlag == false) {
+            document.getElementById('imgSelect').style.backgroundColor = '#369';
+
+            document.getElementById('imgSelect').addEventListener('mouseover', () => {
+                document.getElementById('imgSelect').style.backgroundColor = '#369';
+            });
+
+            document.getElementById('imgSelect').addEventListener('mouseout', () => {
+                document.getElementById('imgSelect').style.backgroundColor = '#369';
+            });
+
+            canvasImage.addEventListener('mousedown', mouseDown);
+            canvasImage.addEventListener('mousemove', mouseMove);
+            canvasImage.addEventListener('mouseup', mouseUpEffect);
+
+            effectFlag = true;
+        } else {
+
+            document.getElementById('imgSelect').style.backgroundColor = '#036';
+
+            document.getElementById('imgSelect').addEventListener('mouseover', () => {
+                document.getElementById('imgSelect').style.backgroundColor = '#369';
+            });
+
+            document.getElementById('imgSelect').addEventListener('mouseout', () => {
+                document.getElementById('imgSelect').style.backgroundColor = '#036';
+            });
+
+            console.log('remove event listeners');
+
+            canvasImage.removeEventListener('mousedown', mouseDown);
+            canvasImage.removeEventListener('mousemove', mouseMove);
+            canvasImage.removeEventListener('mouseup', mouseUpEffect);
+
+            effectFlag = false;
         }
-    });
-    canvasImage.addEventListener('mouseup', (event) => {
-        isDragging = false;
-        console.log(effect);
-        // Obțineți datele pixelilor din zona selectată
-        selectedArea = ctx.getImageData(startX, startY, event.offsetX - startX, event.offsetY - startY);
-        applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
-        // Save image for later use
-        image.src = canvasImage.toDataURL();
-    });
+    }
 });
 
-// delete the selected area
 document.getElementById('imgDelete').addEventListener('click', () => {
-    canvasImage.addEventListener('mousedown', (event) => {
-        isDragging = true;
-        startX = event.offsetX;
-        startY = event.offsetY;
-    });
-    canvasImage.addEventListener('mousemove', (event) => {
-        if (isDragging) {
-            ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
-            drawImage(image);
-            ctx.setLineDash([5, 5]);
-            ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+    if (effectFlag) {
+        alert('Select area for choosing effect is active!');
+    } else {
+        if (deleteFlag == false) {
+
+            document.getElementById('imgDelete').style.backgroundColor = '#369';
+
+            document.getElementById('imgDelete').addEventListener('mouseover', () => {
+                document.getElementById('imgDelete').style.backgroundColor = '#369';
+            });
+
+            document.getElementById('imgDelete').addEventListener('mouseout', () => {
+                document.getElementById('imgDelete').style.backgroundColor = '#369';
+            });
+
+            canvasImage.addEventListener('mousedown', mouseDown);
+            canvasImage.addEventListener('mousemove', mouseMove);
+            canvasImage.addEventListener('mouseup', mouseUpDelete);
+
+            deleteFlag = true;
+
+        } else {
+
+            document.getElementById('imgDelete').style.backgroundColor = '#036';
+
+            document.getElementById('imgDelete').addEventListener('mouseover', () => {
+                document.getElementById('imgDelete').style.backgroundColor = '#369';
+            });
+            document.getElementById('imgDelete').addEventListener('mouseout', () => {
+                document.getElementById('imgDelete').style.backgroundColor = '#036';
+            });
+
+
+            canvasImage.removeEventListener('mousedown', mouseDown);
+            canvasImage.removeEventListener('mousemove', mouseMove);
+            canvasImage.removeEventListener('mouseup', mouseUpDelete);
+
+            deleteFlag = false;
+
         }
-    });
-    canvasImage.addEventListener('mouseup', (event) => {
-        isDragging = false;
-        deleteSelectedArea(image, startX, startY, event.offsetX, event.offsetY);
-        // Save image for later use
-        image.src = canvasImage.toDataURL();
-    });
+    }
 });
+
 
 deleteSelectedArea = (image, startX, startY, endX, endY) => {
     // Set the canvas size to the size of the image
@@ -248,7 +297,14 @@ let inputPositionX;
 let inputPositionY;
 
 document.getElementById('imgText').addEventListener('click', () => {
+    if ( addTextFlag ) {
     document.getElementById('inputContainer').style.display = 'flex';
+
+    addTextFlag = false;
+    } else {
+        document.getElementById('inputContainer').style.display = 'none';
+        addTextFlag = true;
+    }
 });
 
 document.getElementById('text').addEventListener('change', () => {
@@ -293,4 +349,75 @@ document.getElementById('imgSave').addEventListener('click', () => {
     link.download = 'image.png';
     link.href = canvasImage.toDataURL();
     link.click();
+});
+
+let inputWidth;
+let inputHeight;
+
+document.getElementById('imgResize').addEventListener('click', () => {
+    document.getElementById('resizeInput').style.display = 'flex';
+});
+
+document.getElementById('width').addEventListener('change', () => {
+    inputWidth = document.getElementById('width').value;
+});
+
+document.getElementById('height').addEventListener('change', () => {
+    inputHeight = document.getElementById('height').value;
+});
+
+document.getElementById('imgResize').addEventListener('click', () => {
+    if (resizeFlag) {
+
+        document.getElementById('imgResize').style.backgroundColor = '#036';
+
+        document.getElementById('imgResize').addEventListener('mouseover', () => {
+            document.getElementById('imgResize').style.backgroundColor = '#369';
+        });
+        document.getElementById('imgResize').addEventListener('mouseout', () => {
+            document.getElementById('imgResize').style.backgroundColor = '#036';
+        });
+
+        document.getElementById('resizeInput').style.display = 'none';
+
+        resizeFlag = false;
+
+    } else {
+
+        document.getElementById('imgResize').style.backgroundColor = '#369';
+
+        document.getElementById('imgResize').addEventListener('mouseover', () => {
+            document.getElementById('imgResize').style.backgroundColor = '#369';
+        });
+
+        document.getElementById('imgResize').addEventListener('mouseout', () => {
+            document.getElementById('imgResize').style.backgroundColor = '#369';
+        });
+
+        resizeFlag = true;
+
+    }
+});
+
+
+document.getElementById('resize').addEventListener('click', () => {
+
+    const aspectRatio = image.width / image.height;
+    console.log(aspectRatio);
+    console.log(inputWidth);
+    console.log(inputHeight);
+    if (inputWidth === undefined && inputHeight === undefined) {
+        alert('Please enter a value for width or height');
+    } else if (inputWidth === undefined) {
+        inputWidth = inputHeight * aspectRatio;
+    } else if (inputHeight === undefined) {
+        inputHeight = inputWidth / aspectRatio;
+    }
+    // Draw the new image on the canvas
+    canvasImage.width = inputWidth;
+    canvasImage.height = inputHeight;
+    ctx.drawImage(image, 0, 0, inputWidth, inputHeight);
+    // Save image for later use
+    image.src = canvasImage.toDataURL();
+
 });

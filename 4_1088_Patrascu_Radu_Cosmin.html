@@ -24,6 +24,11 @@
                 </li>
                 <li>
                     <button id="imgResize">Resize</button>
+                    <div id="resizeInput" style="display: none;">
+                        <input type="number" id="width" min="1" placeholder="Enter width">
+                        <input type="number" id="height" min="1" placeholder="Enter height">
+                        <button id="resize">Apply</button>
+                    </div>
                 </li>
                 <li>
                     <button id="imgSelect">Select area</button>
@@ -47,7 +52,7 @@
                     </div>
                 </li>
                 <li>
-                    <button id="clearCanvas">Clear canvas</button>
+                    <button id="clearCanvas">Reset canvas</button>
                 </li>
                 <li>
                     <button id="imgUpload">Upload your image</button>
