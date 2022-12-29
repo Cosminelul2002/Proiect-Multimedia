@@ -29,6 +29,9 @@
                     <button id="imgSelect">Select area</button>
                 </li>
                 <li>
+                    <button id="imgDelete">Delete area</button>
+                </li>
+                <li>
                     <div class="add-text">
                         <button id="imgText">Add text to image</button>
                         <div id="inputContainer" style="display:none">
@@ -36,11 +39,8 @@
                                 <input id="text" type="text" id="text" placeholder="Enter text">
                                 <input id="color" type="color" id="color" value="#000000">
                                 <input id="size" type="number" min="1" id="size" placeholder="Enter size">
-                                <select id="position">
-                                    <option value="top">Top</option>
-                                    <option value="bottom">Bottom</option>
-                                    <option value="middle">Middle</option>
-                                </select>
+                                <input id="x" type="number" min="1" id="x" placeholder="Enter x">
+                                <input id="y" type="number" min="1" id="y" placeholder="Enter y">
                             </div>
                             <button id="addText">Add text</button>
                         </div>
@@ -52,6 +52,9 @@
                 <li>
                     <button id="imgUpload">Upload your image</button>
                     <input type='file' id="inputImg" accept="image/*" style="display:none">
+                </li>
+                <li>
+                    <button id="imgSave">Save image</button>
                 </li>
             </ul>
         </div>

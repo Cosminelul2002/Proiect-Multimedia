@@ -79,6 +79,7 @@ resetCanvas.addEventListener('click', () => {
     canvasImage.width = canvasWidth;
     canvasImage.height = canvasHeight;
     ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
+    drawImage(image);
 });
 
 // canvasImage.addEventListener('click', function (event) {
@@ -107,6 +108,7 @@ resetCanvas.addEventListener('click', () => {
 
 let startX = 0;
 let startY = 0;
+let selectedArea;
 
 document.getElementById('imgSelect').addEventListener('click', () => {
     canvasImage.addEventListener('mousedown', (event) => {
@@ -125,9 +127,53 @@ document.getElementById('imgSelect').addEventListener('click', () => {
     canvasImage.addEventListener('mouseup', (event) => {
         isDragging = false;
         console.log(effect);
+        // Obțineți datele pixelilor din zona selectată
+        selectedArea = ctx.getImageData(startX, startY, event.offsetX - startX, event.offsetY - startY);
         applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
     });
 });
+
+// delete the selected area
+document.getElementById('imgDelete').addEventListener('click', () => {
+    canvasImage.addEventListener('mousedown', (event) => {
+        isDragging = true;
+        startX = event.offsetX;
+        startY = event.offsetY;
+    });
+    canvasImage.addEventListener('mousemove', (event) => {
+        if (isDragging) {
+            ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
+            drawImage(image);
+            ctx.setLineDash([5, 5]);
+            ctx.strokeRect(startX, startY, event.offsetX - startX, event.offsetY - startY);
+        }
+    });
+    canvasImage.addEventListener('mouseup', (event) => {
+        isDragging = false;
+        deleteSelectedArea(image, startX, startY, event.offsetX, event.offsetY);
+    });
+});
+
+deleteSelectedArea = (image, startX, startY, endX, endY) => {
+    // Set the canvas size to the size of the image
+    canvasImage.width = image.width;
+    canvasImage.height = image.height;
+
+    // Draw the image on the canvas
+    ctx.drawImage(image, 0, 0);
+
+    // Clip the canvas to the selected area
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(startX, startY, endX - startX, endY - startY);
+    ctx.clip();
+
+    // Clear the selected area
+    ctx.clearRect(startX, startY, endX - startX, endY - startY);
+
+    // Restore the canvas
+    ctx.restore();
+};
 
 document.getElementById('imgEffect').addEventListener('click', () => {
     document.getElementById('effectList').style.display = 'block';
@@ -192,7 +238,8 @@ function applyEffectOnSelectedArea(image, startX, startY, endX, endY, effect) {
 let inputText;
 let inputColor;
 let inputSize;
-let inputPosition;
+let inputPositionX;
+let inputPositionY;
 
 document.getElementById('imgText').addEventListener('click', () => {
     document.getElementById('inputContainer').style.display = 'flex';
@@ -213,9 +260,12 @@ document.getElementById('size').addEventListener('change', () => {
     console.log(inputSize);
 });
 
-document.getElementById('position').addEventListener('change', () => {
-    inputPosition = document.getElementById('position').value;
-    console.log(inputPosition);
+document.getElementById('x').addEventListener('change', () => {
+    inputPositionX = document.getElementById('x').value;
+});
+
+document.getElementById('y').addEventListener('change', () => {
+    inputPositionY = document.getElementById('y').value;
 });
 
 
@@ -223,16 +273,16 @@ document.getElementById('addText').addEventListener('click', (event) => {
     event.preventDefault();
     ctx.font = `${inputSize}px Arial`;
     ctx.fillStyle = inputColor;
-    // calculate the center of the canvas
-    const x = canvasImage.width / 2;
-    const y = canvasImage.height / 2;
-    if (inputPosition === 'top') {
-        // draw text at the top of the canvas
-        ctx.textBaseline = 'top';
-    } else if (inputPosition === 'bottom') {
-        ctx.textBaseline = 'bottom';
+    if (inputPositionX > canvasImage.width || inputPositionY > canvasImage.height) {
+        alert('The text is outside the canvas');
     } else {
-        ctx.textBaseline = 'middle';
+        ctx.fillText(inputText, inputPositionX, inputPositionY);
     }
-    ctx.fillText(inputText, 0, 0);
+});
+
+document.getElementById('imgSave').addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.download = 'image.png';
+    link.href = canvasImage.toDataURL();
+    link.click();
 });
