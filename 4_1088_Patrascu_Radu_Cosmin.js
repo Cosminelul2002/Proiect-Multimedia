@@ -5,6 +5,7 @@
 const canvasImage = document.getElementById('canvasImg');
 const ctx = canvasImage.getContext('2d');
 image = document.createElement('img');
+clearImage = document.createElement('img');
 const uploadButton = document.getElementById('imgUpload');
 const canvasWidth = canvasImage.width;
 const canvasHeight = canvasImage.height;
@@ -43,6 +44,7 @@ document.addEventListener('drop', (event) => {
                 drawImage(image);
             });
             image.setAttribute('src', event.target.result);
+            clearImage.setAttribute('src', event.target.result);
         });
 
         reader.readAsDataURL(file[0]);
@@ -79,7 +81,7 @@ resetCanvas.addEventListener('click', () => {
     canvasImage.width = canvasWidth;
     canvasImage.height = canvasHeight;
     ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
-    drawImage(image);
+    drawImage(clearImage);
 });
 
 // canvasImage.addEventListener('click', function (event) {
@@ -130,6 +132,8 @@ document.getElementById('imgSelect').addEventListener('click', () => {
         // Obțineți datele pixelilor din zona selectată
         selectedArea = ctx.getImageData(startX, startY, event.offsetX - startX, event.offsetY - startY);
         applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
+        // Save image for later use
+        image.src = canvasImage.toDataURL();
     });
 });
 
@@ -151,6 +155,8 @@ document.getElementById('imgDelete').addEventListener('click', () => {
     canvasImage.addEventListener('mouseup', (event) => {
         isDragging = false;
         deleteSelectedArea(image, startX, startY, event.offsetX, event.offsetY);
+        // Save image for later use
+        image.src = canvasImage.toDataURL();
     });
 });
 
@@ -278,6 +284,8 @@ document.getElementById('addText').addEventListener('click', (event) => {
     } else {
         ctx.fillText(inputText, inputPositionX, inputPositionY);
     }
+    // Save image for later use
+    image.src = canvasImage.toDataURL();
 });
 
 document.getElementById('imgSave').addEventListener('click', () => {
