@@ -1,22 +1,42 @@
 'use restrict';
 
+alert('Hello! Welcome to my image editor! \n\n' + 'In order to use the editor, you have to drag and drop an image or click on the upload button. \n\n' + 'After that, you can use the buttons to apply effects, add text, crop, delete, resize and move the image. \n\n' + 'To apply effects on selected areas you need to press Select area button and then Choose effect button, then ypu can pick an effect. \n\n' + 'Also if you want to crop, you need to press first Select area button and then Crop button. \n\n' + 'Enjoy!');
 
 // Declaratios
 const canvasImage = document.getElementById('canvasImg');
+const canvasSelectedArea = document.createElement('canvas');
 const ctx = canvasImage.getContext('2d');
 image = document.createElement('img');
 clearImage = document.createElement('img');
 const uploadButton = document.getElementById('imgUpload');
 const canvasWidth = canvasImage.width;
 const canvasHeight = canvasImage.height;
-let isDragging = false;
-let currentX;
-let currentY;
-let initialX;
-let initialY;
-let xOffset = 0;
-let yOffset = 0;
+
+// Input elements
+let inputText;
+let inputColor;
+let inputSize;
+let inputPositionX;
+let inputPositionY;
+let inputWidth;
+let inputHeight;
 let effect;
+
+// Flags
+let startX = 0;
+let startY = 0;
+let endX = 0;
+let endY = 0;
+let isDragging = false;
+let effectFlag = false;
+let deleteFlag = false;
+let resizeFlag = false;
+let addTextFlag = false;
+let cropFlag = false;
+let moveFlag = false;
+
+let selectedArea;
+
 
 // Draw image method
 const drawImage = (image) => {
@@ -26,7 +46,6 @@ const drawImage = (image) => {
     const ctx = canvasImage.getContext('2d');
     ctx.drawImage(image, 0, 0);
 };
-
 
 // Drag and drop event
 document.addEventListener('dragover', (event) => {
@@ -84,19 +103,20 @@ resetCanvas.addEventListener('click', () => {
     drawImage(image);
 });
 
-let startX = 0;
-let startY = 0;
-let effectFlag = false;
-let deleteFlag = false;
-let resizeFlag = false;
-let addTextFlag = false;
-let selectedArea;
-
 // Mouse events for the canvas
 function mouseDown(event) {
     isDragging = true;
     startX = event.offsetX;
     startY = event.offsetY;
+}
+
+function mouseDownMove(event) {
+    if (event.shiftKey) {
+        console.log('Shift key is pressed');
+        isDragging = true;
+        startX = event.offsetX;
+        startY = event.offsetY;
+    }
 }
 
 function mouseMove(event) {
@@ -110,10 +130,21 @@ function mouseMove(event) {
 
 function mouseUpEffect(event) {
     isDragging = false;
-    // selectedArea = ctx.getImageData(startX, startY, event.offsetX - startX, event.offsetY - startY);
-    applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
+    selectedArea = ctx.getImageData(startX, startY, event.offsetX - startX, event.offsetY - startY);
+    if (cropFlag == true) {
+        canvasSelectedArea.width = selectedArea.width;
+        canvasSelectedArea.height = selectedArea.height;
+        const ctxSelectedArea = canvasSelectedArea.getContext('2d');
+        ctxSelectedArea.putImageData(selectedArea, 0, 0);
+        drawImage(canvasSelectedArea);
+    }else if (moveFlag == true) {
+        moveSelectedArea(image, startX, startY, event.offsetX, event.offsetY);
+    } else {
+        applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
+    }
     image.src = canvasImage.toDataURL();
 }
+
 
 function mouseUpDelete(event) {
     isDragging = false;
@@ -121,7 +152,31 @@ function mouseUpDelete(event) {
     image.src = canvasImage.toDataURL();
 }
 
-document.getElementById('imgSelect').addEventListener('click', () => {
+function mouseUpMove(event) {
+    if (isDragging) {
+        isDragging = false;
+    }
+}
+
+function mouseMoveMove(event) {
+    if (isDragging) {
+        endX = event.clientX;
+        endY = event.clientY;
+        moveSelectedArea(image, startX, startY, endX, endY);
+        image.src = canvasImage.toDataURL();
+    }
+}
+
+moveSelectedArea = (image, startX, startY, endX, endY) => {
+    const ctx = canvasImage.getContext('2d');
+    ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
+    drawImage(image);
+    ctx.putImageData(selectedArea, endX - startX, endY - startY);
+}
+
+
+// Select area button
+document.getElementById('imgSelect').addEventListener('click', (event) => {
     if (deleteFlag) {
         alert('Delete area is active!');
     } else {
@@ -164,6 +219,7 @@ document.getElementById('imgSelect').addEventListener('click', () => {
     }
 });
 
+// Delete area button
 document.getElementById('imgDelete').addEventListener('click', () => {
     if (effectFlag) {
         alert('Select area for choosing effect is active!');
@@ -208,7 +264,7 @@ document.getElementById('imgDelete').addEventListener('click', () => {
     }
 });
 
-
+// Delete selected area function
 deleteSelectedArea = (image, startX, startY, endX, endY) => {
     // Set the canvas size to the size of the image
     canvasImage.width = image.width;
@@ -238,6 +294,7 @@ document.getElementById('list').addEventListener('change', () => {
     effect = document.getElementById('list').value;
 });
 
+// Apply effect on selected area function
 function applyEffectOnSelectedArea(image, startX, startY, endX, endY, effect) {
     // Set the canvas size to the size of the image
     canvasImage.width = image.width;
@@ -290,17 +347,12 @@ function applyEffectOnSelectedArea(image, startX, startY, endX, endY, effect) {
     ctx.restore();
 }
 
-let inputText;
-let inputColor;
-let inputSize;
-let inputPositionX;
-let inputPositionY;
-
+// Add text
 document.getElementById('imgText').addEventListener('click', () => {
-    if ( addTextFlag ) {
-    document.getElementById('inputContainer').style.display = 'flex';
+    if (addTextFlag) {
+        document.getElementById('inputContainer').style.display = 'flex';
 
-    addTextFlag = false;
+        addTextFlag = false;
     } else {
         document.getElementById('inputContainer').style.display = 'none';
         addTextFlag = true;
@@ -330,7 +382,6 @@ document.getElementById('y').addEventListener('change', () => {
     inputPositionY = document.getElementById('y').value;
 });
 
-
 document.getElementById('addText').addEventListener('click', (event) => {
     event.preventDefault();
     ctx.font = `${inputSize}px Arial`;
@@ -344,6 +395,7 @@ document.getElementById('addText').addEventListener('click', (event) => {
     image.src = canvasImage.toDataURL();
 });
 
+// Save image
 document.getElementById('imgSave').addEventListener('click', () => {
     const link = document.createElement('a');
     link.download = 'image.png';
@@ -351,9 +403,7 @@ document.getElementById('imgSave').addEventListener('click', () => {
     link.click();
 });
 
-let inputWidth;
-let inputHeight;
-
+// Resize image
 document.getElementById('imgResize').addEventListener('click', () => {
     document.getElementById('resizeInput').style.display = 'flex';
 });
@@ -399,7 +449,7 @@ document.getElementById('imgResize').addEventListener('click', () => {
     }
 });
 
-
+// Resize image function
 document.getElementById('resize').addEventListener('click', () => {
 
     const aspectRatio = image.width / image.height;
@@ -420,4 +470,66 @@ document.getElementById('resize').addEventListener('click', () => {
     // Save image for later use
     image.src = canvasImage.toDataURL();
 
+});
+
+document.getElementById('imgCrop').addEventListener('click', () => {
+        if (cropFlag == false) {
+
+            document.getElementById('imgCrop').style.backgroundColor = '#369';
+
+            document.getElementById('imgCrop').addEventListener('mouseover', () => {
+                document.getElementById('imgCrop').style.backgroundColor = '#369';
+            });
+
+            document.getElementById('imgCrop').addEventListener('mouseout', () => {
+                document.getElementById('imgCrop').style.backgroundColor = '#369';
+            });
+
+            cropFlag = true;
+
+        } else {
+
+            document.getElementById('imgCrop').style.backgroundColor = '#036';
+
+            document.getElementById('imgCrop').addEventListener('mouseover', () => {
+                document.getElementById('imgCrop').style.backgroundColor = '#369';
+            });
+            document.getElementById('imgCrop').addEventListener('mouseout', () => {
+                document.getElementById('imgCrop').style.backgroundColor = '#036';
+            });
+
+            cropFlag = false;
+
+        }
+});
+
+document.getElementById('imgMove').addEventListener('click', () => {
+    if (moveFlag == false) {
+
+        document.getElementById('imgMove').style.backgroundColor = '#369';
+
+        document.getElementById('imgMove').addEventListener('mouseover', () => {
+            document.getElementById('imgMove').style.backgroundColor = '#369';
+        });
+
+        document.getElementById('imgMove').addEventListener('mouseout', () => {
+            document.getElementById('imgMove').style.backgroundColor = '#369';
+        });
+
+        moveFlag = true;
+
+    } else {
+
+        document.getElementById('imgMove').style.backgroundColor = '#036';
+
+        document.getElementById('imgMove').addEventListener('mouseover', () => {
+            document.getElementById('imgMove').style.backgroundColor = '#369';
+        });
+        document.getElementById('imgMove').addEventListener('mouseout', () => {
+            document.getElementById('imgMove').style.backgroundColor = '#036';
+        });
+
+        moveFlag = false;
+
+    }
 });
