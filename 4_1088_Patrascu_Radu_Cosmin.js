@@ -181,6 +181,9 @@ document.getElementById('imgSelect').addEventListener('click', (event) => {
         alert('Delete area is active!');
     } else {
         if (effectFlag == false) {
+
+            alert('Press Choose effect or Crop buttons!');
+
             document.getElementById('imgSelect').style.backgroundColor = '#369';
 
             document.getElementById('imgSelect').addEventListener('mouseover', () => {
@@ -287,12 +290,64 @@ deleteSelectedArea = (image, startX, startY, endX, endY) => {
 };
 
 document.getElementById('imgEffect').addEventListener('click', () => {
-    document.getElementById('effectList').style.display = 'block';
+    if ( cropFlag == false) {
+        document.getElementById('effectList').style.display = 'block';
+    } else {
+        alert('Crop is active!');
+    }
 });
 
 document.getElementById('list').addEventListener('change', () => {
     effect = document.getElementById('list').value;
+
+    if ( effectFlag == false) {
+        applyEffectOnWholeImage(image, effect);
+        image.src = canvasImage.toDataURL();
+    }
 });
+
+applyEffectOnWholeImage = (image, effect) => {
+    // Set the canvas size to the size of the image
+    canvasImage.width = image.width;
+    canvasImage.height = image.height;
+    console.log(effect);
+
+    // Draw the image on the canvas
+    ctx.drawImage(image, 0, 0);
+
+    // Apply the desired effect on the whole image
+    switch (effect) {
+        case 'grayscale':
+            ctx.filter = 'grayscale(100%)';
+            break;
+        case 'sepia':
+            ctx.filter = 'sepia(100%)';
+            break;
+        case 'invert':
+            ctx.filter = 'invert(100%)';
+            break;
+        case 'blur':
+            ctx.filter = 'blur(5px)';
+            break;
+        case 'brightness':
+            ctx.filter = 'brightness(200%)';
+            break;
+        case 'contrast':
+            ctx.filter = 'contrast(200%)';
+            break;
+        case 'hue-rotate':
+            ctx.filter = 'hue-rotate(90deg)';
+            break;
+        case 'saturate':
+            ctx.filter = 'saturate(200%)';
+            break;
+        default:
+            break;
+    }
+
+    // Draw the image on the canvas
+    ctx.drawImage(image, 0, 0);
+};
 
 // Apply effect on selected area function
 function applyEffectOnSelectedArea(image, startX, startY, endX, endY, effect) {
