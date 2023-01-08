@@ -81,7 +81,7 @@ const uploadImage = (event) => {
     if (file.length > 0) {
         const reader = new FileReader();
         reader.addEventListener('load', (event) => {
-            const image = document.createElement('img');
+            // const image = document.createElement('img');
             image.addEventListener('load', () => {
                 drawImage(image);
             });
