@@ -1,7 +1,5 @@
 'use restrict';
 
-alert('Hello! Welcome to my image editor! \n\n' + 'In order to use the editor, you have to drag and drop an image or click on the upload button. \n\n' + 'After that, you can use the buttons to apply effects, add text, crop, delete, resize and move the image. \n\n' + 'To apply effects on selected areas you need to press Select area button and then Choose effect button, then ypu can pick an effect. \n\n' + 'Also if you want to crop, you need to press first Select area button and then Crop button. \n\n' + 'Enjoy!');
-
 // Declaratios
 const canvasImage = document.getElementById('canvasImg');
 const canvasSelectedArea = document.createElement('canvas');
@@ -36,6 +34,14 @@ let cropFlag = false;
 let moveFlag = false;
 
 let selectedArea;
+
+document.getElementById('imgDocs').addEventListener('click', () => {
+    document.getElementById('info').style.display = 'block';
+});
+
+document.getElementById('hideBtn').addEventListener('click', () => {
+    document.getElementById('info').style.display = 'none';
+});
 
 
 // Draw image method
@@ -110,6 +116,7 @@ function mouseDown(event) {
     startY = event.offsetY;
 }
 
+// Does nothing
 function mouseDownMove(event) {
     if (event.shiftKey) {
         console.log('Shift key is pressed');
@@ -137,7 +144,8 @@ function mouseUpEffect(event) {
         const ctxSelectedArea = canvasSelectedArea.getContext('2d');
         ctxSelectedArea.putImageData(selectedArea, 0, 0);
         drawImage(canvasSelectedArea);
-    }else if (moveFlag == true) {
+    } else if (moveFlag == true) {
+        // Does nothing
         moveSelectedArea(image, startX, startY, event.offsetX, event.offsetY);
     } else {
         applyEffectOnSelectedArea(image, startX, startY, event.offsetX, event.offsetY, effect);
@@ -158,6 +166,7 @@ function mouseUpMove(event) {
     }
 }
 
+// Does nothing
 function mouseMoveMove(event) {
     if (isDragging) {
         endX = event.clientX;
@@ -167,6 +176,7 @@ function mouseMoveMove(event) {
     }
 }
 
+// Does nothing
 moveSelectedArea = (image, startX, startY, endX, endY) => {
     const ctx = canvasImage.getContext('2d');
     ctx.clearRect(0, 0, canvasImage.width, canvasImage.height);
@@ -182,7 +192,7 @@ document.getElementById('imgSelect').addEventListener('click', (event) => {
     } else {
         if (effectFlag == false) {
 
-            alert('Press Choose effect or Crop buttons!');
+            alert('Press Choose effect or Crop!');
 
             document.getElementById('imgSelect').style.backgroundColor = '#369';
 
@@ -276,7 +286,6 @@ deleteSelectedArea = (image, startX, startY, endX, endY) => {
     // Draw the image on the canvas
     ctx.drawImage(image, 0, 0);
 
-    // Clip the canvas to the selected area
     ctx.save();
     ctx.beginPath();
     ctx.rect(startX, startY, endX - startX, endY - startY);
@@ -290,7 +299,7 @@ deleteSelectedArea = (image, startX, startY, endX, endY) => {
 };
 
 document.getElementById('imgEffect').addEventListener('click', () => {
-    if ( cropFlag == false) {
+    if (cropFlag == false) {
         document.getElementById('effectList').style.display = 'block';
     } else {
         alert('Crop is active!');
@@ -300,7 +309,7 @@ document.getElementById('imgEffect').addEventListener('click', () => {
 document.getElementById('list').addEventListener('change', () => {
     effect = document.getElementById('list').value;
 
-    if ( effectFlag == false) {
+    if (effectFlag == false) {
         applyEffectOnWholeImage(image, effect);
         image.src = canvasImage.toDataURL();
     }
@@ -405,11 +414,12 @@ function applyEffectOnSelectedArea(image, startX, startY, endX, endY, effect) {
 // Add text
 document.getElementById('imgText').addEventListener('click', () => {
     if (addTextFlag) {
-        document.getElementById('inputContainer').style.display = 'flex';
+        document.getElementById('inputContainer').style.display = 'none';
 
         addTextFlag = false;
     } else {
-        document.getElementById('inputContainer').style.display = 'none';
+        document.getElementById('inputContainer').style.display = 'flex';
+
         addTextFlag = true;
     }
 });
@@ -528,34 +538,34 @@ document.getElementById('resize').addEventListener('click', () => {
 });
 
 document.getElementById('imgCrop').addEventListener('click', () => {
-        if (cropFlag == false) {
+    if (cropFlag == false) {
 
+        document.getElementById('imgCrop').style.backgroundColor = '#369';
+
+        document.getElementById('imgCrop').addEventListener('mouseover', () => {
             document.getElementById('imgCrop').style.backgroundColor = '#369';
+        });
 
-            document.getElementById('imgCrop').addEventListener('mouseover', () => {
-                document.getElementById('imgCrop').style.backgroundColor = '#369';
-            });
+        document.getElementById('imgCrop').addEventListener('mouseout', () => {
+            document.getElementById('imgCrop').style.backgroundColor = '#369';
+        });
 
-            document.getElementById('imgCrop').addEventListener('mouseout', () => {
-                document.getElementById('imgCrop').style.backgroundColor = '#369';
-            });
+        cropFlag = true;
 
-            cropFlag = true;
+    } else {
 
-        } else {
+        document.getElementById('imgCrop').style.backgroundColor = '#036';
 
+        document.getElementById('imgCrop').addEventListener('mouseover', () => {
+            document.getElementById('imgCrop').style.backgroundColor = '#369';
+        });
+        document.getElementById('imgCrop').addEventListener('mouseout', () => {
             document.getElementById('imgCrop').style.backgroundColor = '#036';
+        });
 
-            document.getElementById('imgCrop').addEventListener('mouseover', () => {
-                document.getElementById('imgCrop').style.backgroundColor = '#369';
-            });
-            document.getElementById('imgCrop').addEventListener('mouseout', () => {
-                document.getElementById('imgCrop').style.backgroundColor = '#036';
-            });
+        cropFlag = false;
 
-            cropFlag = false;
-
-        }
+    }
 });
 
 document.getElementById('imgMove').addEventListener('click', () => {
